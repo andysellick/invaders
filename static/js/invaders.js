@@ -116,18 +116,8 @@ var lenny = {
     people: {
         //initialise data for the player object
         setupPlayer: function(){
-            player = new characterobj();
-
-            player.actorwidth = canvas.width / 20; //30;
-            player.actorheight = canvas.width / 20; //30;
-            player.spritewidth = 30;
-            player.spriteheight = 30;
-
-            player.sprite = playerimages[0];
-            player.expired = playerimages[1];
-            player.level = 1;
-            player.xp = 1;
-
+            player = new playerObj("Player 1","player",playerimages[0],20,20,canvas.width / 20,canvas.width / 20);
+            player.info();
             player.xpos = (canvas.width / 2) - (player.actorwidth / 2);
             player.ypos = canvas.height - (player.actorheight * 2);
         },

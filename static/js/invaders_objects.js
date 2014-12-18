@@ -1,4 +1,87 @@
 
+//generic object
+var genericObj = function(objname,objtype,sprite,spritewidth,spriteheight,actorwidth,actorheight){
+    this.objname = objname;
+    this.objtype = objtype;
+    this.sprite = sprite;
+    this.spritexy;
+    this.spritewidth = spritewidth;
+    this.spriteheight = spriteheight;
+
+    this.xpos;
+    this.ypos;
+    this.actorwidth = actorwidth;
+    this.actorheight = actorheight;
+    
+    this.info = function(){
+        console.log(objname,objtype,sprite,spritewidth,spriteheight,actorwidth,actorheight);
+    };
+
+    this.draw = function(){
+        lenny.general.drawOnCanvas(this,canvas_cxt);
+    };
+}
+
+//extends generic object for character objects e.g. player, enemies
+var characterObj = function(objname,objtype){
+    genericObj.apply(this,arguments);
+}
+
+characterObj.prototype = genericObj.prototype;
+characterObj.prototype.constructor = characterObj;
+
+
+//var playerObj = function(objname,objtype){
+//}
+
+//specific object for the player
+var playerObj = function(){
+    characterObj.apply(this,arguments);
+
+    this.points = 0;
+    this.level = 1;
+    this.xp = 1;
+    this.score = 1;
+    this.active = 0;
+    this.shotexists = 0;
+
+    this.fire = function(){
+        if(!this.shotexists){
+            //this.shotexists = 1;
+            shot = new shotObj;
+            shot.xpos = this.xpos;
+            shot.ypos = this.ypos;
+            shot.direction = 1;
+            playershots.push(shot);
+        }
+    };
+
+    //if the player has levelled up
+    this.levelUp = function(levelup){
+        if(this.xp > 2 || levelup){
+            this.level += 1;
+            this.xp = 0;
+            //FIXME now create a new message and append it to the message stack
+            message = new messageObj();
+            message.xpos = this.xpos;
+            message.ypos = this.ypos - message.actorheight;
+            messages.push(message);
+        }
+        //console.log("xp: %d, score: %d, level: %d.",player.xp,player.score,player.level);
+    };
+    this.expire = function(){
+        //change the player image to represent defeat
+        this.sprite = allimages[2];
+        return(0);
+    };
+}
+
+playerObj.prototype = characterObj.prototype;
+playerObj.prototype.constructor = playerObj;
+
+
+
+
 //laser object
 function shotObj(){
     this.sprite = shotimages[0];
@@ -64,59 +147,7 @@ function messageObj(){
     }
 }
 
-//general object for main character
-function characterobj(){
-    this.sprite;
-    this.spritex = 0;
-    this.spritey = 0;
-    this.spritewidth = 20;
-    this.spriteheight = 20;
-    this.actorwidth;
-    this.actorheight;
-    this.xpos;
-    this.ypos;
-    this.speed;
-    this.points = 0;
-    this.level = 1;
-    this.xp = 0;
-    this.score = 1;
-    this.active = 0;
-    this.shotexists = 0;
 
-    this.runActions = function(){
-        lenny.general.drawOnCanvas(this,canvas_cxt);
-    };
-
-    this.fire = function(){
-        if(!this.shotexists){
-            //this.shotexists = 1;
-            shot = new shotObj;
-            shot.xpos = this.xpos;
-            shot.ypos = this.ypos;
-            shot.direction = 1;
-            playershots.push(shot);
-        }
-    };
-
-    //if the player has levelled up
-    this.levelUp = function(levelup){
-        if(this.xp > 2 || levelup){
-            this.level += 1;
-            this.xp = 0;
-            //FIXME now create a new message and append it to the message stack
-            message = new messageObj();
-            message.xpos = this.xpos;
-            message.ypos = this.ypos - message.actorheight;
-            messages.push(message);
-        }
-        //console.log("xp: %d, score: %d, level: %d.",player.xp,player.score,player.level);
-    };
-    this.expire = function(){
-        //change the player image to represent defeat
-        this.sprite = allimages[2];
-        return(0);
-    };
-}
 
 //general object for enemy
 function enemyobj(){
