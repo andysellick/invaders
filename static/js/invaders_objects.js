@@ -7,6 +7,8 @@ var genericObj = function(objname,objtype,sprite,spritewidth,spriteheight,actorw
     this.spritexy;
     this.spritewidth = spritewidth;
     this.spriteheight = spriteheight;
+    this.spritex = 0;
+    this.spritey = 0;
 
     this.xpos;
     this.ypos;
@@ -18,21 +20,23 @@ var genericObj = function(objname,objtype,sprite,spritewidth,spriteheight,actorw
     };
 
     this.draw = function(){
-        lenny.general.drawOnCanvas(this,canvas_cxt);
+        //console.log('drawing',this.objname)
+        canvas_cxt.drawImage(this.sprite, this.spritex, this.spritey, this.spritewidth, this.spriteheight, this.xpos, this.ypos, this.actorwidth, this.actorheight);
     };
 }
 
 //extends generic object for character objects e.g. player, enemies
 var characterObj = function(objname,objtype){
     genericObj.apply(this,arguments);
+
+    this.test = function(){
+        console.log('add more functions here if needed');
+    }
+
 }
 
 characterObj.prototype = genericObj.prototype;
 characterObj.prototype.constructor = characterObj;
-
-
-//var playerObj = function(objname,objtype){
-//}
 
 //specific object for the player
 var playerObj = function(){
@@ -48,11 +52,7 @@ var playerObj = function(){
     this.fire = function(){
         if(!this.shotexists){
             //this.shotexists = 1;
-            shot = new shotObj;
-            shot.xpos = this.xpos;
-            shot.ypos = this.ypos;
-            shot.direction = 1;
-            playershots.push(shot);
+            lenny.people.setupShot(this.xpos,this.ypos,1)
         }
     };
 
@@ -80,89 +80,10 @@ playerObj.prototype = characterObj.prototype;
 playerObj.prototype.constructor = playerObj;
 
 
-
-
-//laser object
-function shotObj(){
-    this.sprite = shotimages[0];
-    this.spritex = 0;
-    this.spritey = 0;
-    this.spritewidth = 30;
-    this.spriteheight = 30;
-    this.actorwidth = canvas.width / 20; //30
-    this.actorheight = canvas.width / 20; //30
-    this.xpos;
-    this.ypos;
-    this.speed = canvas.height / 200;
-    this.direction;
-
-    this.draw = function(){
-        lenny.general.drawOnCanvas(this,canvas_cxt);
-    };
-
-    this.move = function(){
-        if(this.direction){ //shot fired by player, goes up
-            this.ypos -= this.speed;
-        }
-        else { //shot fired by enemy, goes down
-            this.ypos += this.speed;
-        }
-    };
-    this.checkCollision = function(){
-        for(var i = 1; i <= enemies.length; i++){
-            if(checkPlayerCollision(enemies[i-1],this)){
-                enemies[i-1].moveby = 0;
-                return(i);
-            }
-        }
-        return(0);
-    };
-}
-
-function messageObj(){
-    this.sprite = allimages[3];
-    this.spritex = 0;
-    this.spritey = 0;
-    this.spritewidth = 30;
-    this.spriteheight = 30;
-    this.actorwidth = canvas.width / 20; //30
-    this.actorheight = canvas.width / 20; //30
-    this.xpos;
-    this.ypos;
-    this.lifespan = 40;
-
-    //check to see if this message is due to disappear
-    this.checkLifeSpan = function(){
-        if(this.lifespan > 0){
-            this.lifespan--;
-            return(0);
-        }
-        else {
-            return(1);
-        }
-    }
-    this.drawMessage = function(){
-        //console.log(this.sprite);
-        lenny.general.drawOnCanvas(this,canvas_cxt);
-    }
-}
-
-
-
 //general object for enemy
 function enemyobj(){
-    this.sprite;
-    this.expiredimage;
-    this.spritex = 0;
-    this.spritey = 0;
-    this.spritewidth = 0;
-    this.spriteheight = 0;
-    this.actorwidth;
-    this.actorheight;
-    this.xpos;
-    this.ypos;
+    characterObj.apply(this,arguments);
 
-    this.etype;
     this.range = 0;
     this.direction = 0;
     this.startpos = 0;
@@ -170,9 +91,6 @@ function enemyobj(){
     this.xp = 1;
     this.level = 1;
 
-    this.runActions = function(){
-        lenny.general.drawOnCanvas(this,canvas_cxt);
-    };
     //move character left or right
     this.move = function(){
         if(this.moveby){
@@ -231,6 +149,72 @@ function enemyobj(){
         return(0);
     };
 }
+
+enemyobj.prototype = characterObj.prototype;
+enemyobj.prototype.constructor = enemyobj;
+
+
+//laser object
+function shotObj(){
+    characterObj.apply(this,arguments);
+
+    this.speed = canvas.height / 200;
+    this.direction;
+
+    this.move = function(){
+        if(this.direction){ //shot fired by player, goes up
+            this.ypos -= this.speed;
+        }
+        else { //shot fired by enemy, goes down
+            this.ypos += this.speed;
+        }
+    };
+    this.checkCollision = function(){
+        for(var i = 1; i <= enemies.length; i++){
+            if(checkPlayerCollision(enemies[i-1],this)){
+                enemies[i-1].moveby = 0;
+                return(i);
+            }
+        }
+        return(0);
+    };
+}
+
+shotObj.prototype = characterObj.prototype;
+shotObj.prototype.constructor = shotObj;
+
+
+function messageObj(){
+    this.sprite = allimages[3];
+    this.spritex = 0;
+    this.spritey = 0;
+    this.spritewidth = 30;
+    this.spriteheight = 30;
+    this.actorwidth = canvas.width / 20; //30
+    this.actorheight = canvas.width / 20; //30
+    this.xpos;
+    this.ypos;
+    this.lifespan = 40;
+
+    //check to see if this message is due to disappear
+    this.checkLifeSpan = function(){
+        if(this.lifespan > 0){
+            this.lifespan--;
+            return(0);
+        }
+        else {
+            return(1);
+        }
+    }
+    this.drawMessage = function(){
+        //console.log(this.sprite);
+        lenny.general.drawOnCanvas(this,canvas_cxt);
+    }
+}
+
+
+
+
 
 //general object for object
 function objectobj(){

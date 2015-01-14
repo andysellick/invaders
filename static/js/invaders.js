@@ -101,10 +101,6 @@ var lenny = {
             game = 0;
             player.score = player.score * level;
         },
-        //draw some object on the canvas
-        drawOnCanvas: function(object, cxt){
-            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.spritewidth, object.spriteheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
-        },
         //completely clear the canvas
         clearCanvas: function(canvas, cxt){
             cxt.clearRect(0, 0, canvas.width, canvas.height);//clear the canvas
@@ -116,7 +112,7 @@ var lenny = {
     people: {
         //initialise data for the player object
         setupPlayer: function(){
-            player = new playerObj("Player 1","player",playerimages[0],20,20,canvas.width / 20,canvas.width / 20);
+            player = new playerObj("Player 1","player",playerimages[0],30,30,canvas.width / 20,canvas.width / 20);
             player.info();
             player.xpos = (canvas.width / 2) - (player.actorwidth / 2);
             player.ypos = canvas.height - (player.actorheight * 2);
@@ -132,13 +128,8 @@ var lenny = {
                     enemyx = getRandomArbitrary(0,canvas.width); //randomly position x FIXME
                     enemyy = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']); //FIXME
 
-                    enemytmp = new enemyobj();
-                    enemytmp.sprite = enemyinfo[i]['img'];
-                    enemytmp.expiredimage = enemyinfo[i]['expired'];
-                    enemytmp.spritewidth = enemyinfo[i]['spritewidth'];
-                    enemytmp.spriteheight = enemyinfo[i]['spriteheight'];
-                    enemytmp.actorwidth = enemyinfo[i]['width'];
-                    enemytmp.actorheight = enemyinfo[i]['height'];
+                    enemytmp = new enemyobj("enemy",enemyinfo[i]['type'],enemyinfo[i]['img'],enemyinfo[i]['spritewidth'],enemyinfo[i]['spriteheight'],enemyinfo[i]['width'],enemyinfo[i]['height']);
+                    
                     if(!enemyinfo[i]['xpos'] && !enemyinfo[i]['ypos']){
                         enemytmp.xpos = getRandomArbitrary(0,canvas.width); //randomly position x
                         enemytmp.ypos = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
@@ -147,7 +138,6 @@ var lenny = {
                         enemytmp.xpos = enemyinfo[i]['xpos']
                         enemytmp.ypos = enemyinfo[i]['ypos']
                     }
-                    enemytmp.etype = enemyinfo[i]['type'];
                     enemytmp.range = getRandomArbitrary(50,canvas.width / 4); //distance the enemy will move
                     enemytmp.direction = getRandomArbitrary(0,1);
                     enemytmp.startpos = enemytmp.xpos;
@@ -157,6 +147,15 @@ var lenny = {
                     enemies.push(enemytmp);
                 }
             }
+        },
+        //create laser!
+        setupShot: function(xpos,ypos,dir){
+            shot = new shotObj("shot","shot",shotimages[0],30,30,canvas.width / 20,canvas.width / 20);
+            shot.xpos = xpos;
+            shot.ypos = ypos;
+            shot.direction = dir;
+            playershots.push(shot);
+
         },
         //initialise data for power ups
         /*
@@ -192,10 +191,10 @@ var lenny = {
                 for(var i = 0; i < enemies.length; i++){ //draw enemies
                     //if(enemies[i].checkCollision(player))
                         //enemies.splice(i, 1);
-                    enemies[i].runActions();
+                    enemies[i].draw();
                     enemies[i].move();
                 }
-                player.runActions(); //draw player
+                player.draw(); //draw player
                 for(var i = 0; i < messages.length; i++){ //draw messages
                     if(messages[i].checkLifeSpan()){
                         messages.splice(i,1);
